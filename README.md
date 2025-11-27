@@ -1,3 +1,4 @@
+
 # Shreeji Furniture Website
 
 A modern, elegant furniture e-commerce website built with React and Node.js.
@@ -101,3 +102,4 @@ This project is proprietary and confidential.
 ---
 
 Built with ❤️ for Shreeji Furniture
+# furniture-website-1
