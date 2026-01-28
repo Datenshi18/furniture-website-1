@@ -1,3 +1,4 @@
+const { connectDB } = require('../config/db'); // Import the connection function
 const Booking = require('../models/Booking');
 const Product = require('../models/Product');
 const { sendEmail } = require('../utils/email');
@@ -5,6 +6,9 @@ const mongoose = require('mongoose');
 
 exports.createBooking = async (req, res) => {
   try {
+    // Ensure DB is connected before proceeding
+    await connectDB();
+    
     const { productId, name, email, phone, message } = req.body;
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: 'Product not found' });
@@ -38,6 +42,9 @@ exports.createBooking = async (req, res) => {
 
 exports.getBookings = async (req, res) => {
   try {
+    // Ensure DB is connected before proceeding
+    await connectDB();
+    
     // Admin: get all bookings, User: get own bookings
     let bookings;
     if (req.user && req.user.role === 'admin') {
@@ -53,6 +60,9 @@ exports.getBookings = async (req, res) => {
 
 exports.updateBookingStatus = async (req, res) => {
   try {
+    // Ensure DB is connected before proceeding
+    await connectDB();
+    
     const { id } = req.params;
     const { status } = req.body;
     if (!mongoose.Types.ObjectId.isValid(id)) {

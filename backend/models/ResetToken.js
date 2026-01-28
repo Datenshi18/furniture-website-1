@@ -1,4 +1,8 @@
 const mongoose = require('mongoose');
+const { connectDB } = require('../config/db'); // Import the connection function
+
+// Make sure to connect before using the model
+connectDB().catch(console.error);
 
 const resetTokenSchema = new mongoose.Schema({
   user: {

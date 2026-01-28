@@ -43,13 +43,12 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+// Import the connection function
+const { connectDB } = require('./config/db');
+
+// Connect to database and initialize
+connectDB()
   .then(async () => {
-    console.log('MongoDB connected');
     console.log('Environment check:');
     console.log('- Cloudinary Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME);
     console.log('- JWT Secret length:', process.env.JWT_SECRET?.length || 0);
@@ -58,31 +57,36 @@ mongoose.connect(process.env.MONGO_URI, {
     const { initializeDatabase } = require('./initDatabase');
     await initializeDatabase();
   })
-  .catch((err) => console.error('MongoDB connection error:', err));
+  .then(() => {
+    // Routes
+    const authRoutes = require('./routes/auth');
+    const productRoutes = require('./routes/product');
+    const bookingRoutes = require('./routes/booking');
+    const analyticsRoutes = require('./routes/analytics');
 
-// Routes
-const authRoutes = require('./routes/auth');
-const productRoutes = require('./routes/product');
-const bookingRoutes = require('./routes/booking');
-const analyticsRoutes = require('./routes/analytics');
+    app.use('/api/auth', authRoutes);
+    app.use('/api/products', productRoutes);
+    app.use('/api/bookings', bookingRoutes);
+    app.use('/api/analytics', analyticsRoutes);
 
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/bookings', bookingRoutes);
-app.use('/api/analytics', analyticsRoutes);
+    // Test route
+    app.get('/', (req, res) => {
+      res.send('Furniture Tirth API is running');
+    });
 
-// Test route
-app.get('/', (req, res) => {
-  res.send('Furniture Tirth API is running');
-});
+    // Error handler
+    app.use((err, req, res, next) => {
+      console.error('Error occurred:', err.message);
+      console.error('Stack:', err.stack);
+      res.status(500).json({ message: err.message || 'Server error' });
+    });
 
-// Error handler
-app.use((err, req, res, next) => {
-  console.error('Error occurred:', err.message);
-  console.error('Stack:', err.stack);
-  res.status(500).json({ message: err.message || 'Server error' });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+    // Start server only after DB connection is established
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to connect to MongoDB:', err);
+    process.exit(1); // Exit if unable to connect to database
+  });

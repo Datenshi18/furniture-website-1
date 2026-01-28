@@ -1,3 +1,4 @@
+const { connectDB } = require('../config/db'); // Import the connection function
 const User = require('../models/User');
 const ResetToken = require('../models/ResetToken');
 const bcrypt = require('bcryptjs');
@@ -7,6 +8,9 @@ const { sendEmail } = require('../utils/email');
 
 exports.register = async (req, res) => {
   try {
+    // Ensure DB is connected before proceeding
+    await connectDB();
+    
     const { name, email, password, role } = req.body;
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: 'User already exists' });
@@ -20,6 +24,9 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
+    // Ensure DB is connected before proceeding
+    await connectDB();
+    
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
@@ -34,6 +41,9 @@ exports.login = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
   try {
+    // Ensure DB is connected before proceeding
+    await connectDB();
+    
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(200).json({ message: 'If that email exists, a reset link was sent' });
@@ -55,6 +65,9 @@ exports.forgotPassword = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
   try {
+    // Ensure DB is connected before proceeding
+    await connectDB();
+    
     const { token, uid, password } = req.body;
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const record = await ResetToken.findOne({ user: uid, tokenHash, expiresAt: { $gt: new Date() } });
