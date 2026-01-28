@@ -9,17 +9,33 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+// Robust CORS setup
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL, 'https://your-domain.vercel.app']
-    : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'],
-  credentials: true
+  origin: (origin, callback) => {
+    const allowed = [
+      process.env.FRONTEND_URL,        // your Vercel site
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'http://localhost:5175',
+      'http://localhost:5176',
+    ];
+
+    // Allow requests with no origin (Postman, server-to-server, etc.)
+    if (!origin) return callback(null, true);
+
+    if (allowed.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS blocked: ${origin}`));
+  },
+  credentials: true,
 };
+
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Request logging
+// Request logging (dev only)
 if (process.env.NODE_ENV !== 'production') {
   app.use((req, res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
@@ -37,13 +53,14 @@ mongoose.connect(process.env.MONGO_URI, {
     console.log('Environment check:');
     console.log('- Cloudinary Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME);
     console.log('- JWT Secret length:', process.env.JWT_SECRET?.length || 0);
-    
+
     // Initialize database with default admin user
     const { initializeDatabase } = require('./initDatabase');
     await initializeDatabase();
   })
   .catch((err) => console.error('MongoDB connection error:', err));
 
+// Routes
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/product');
 const bookingRoutes = require('./routes/booking');
@@ -54,6 +71,11 @@ app.use('/api/products', productRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
+// Test route
+app.get('/', (req, res) => {
+  res.send('Furniture Tirth API is running');
+});
+
 // Error handler
 app.use((err, req, res, next) => {
   console.error('Error occurred:', err.message);
@@ -61,11 +83,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message || 'Server error' });
 });
 
-// Test route
-app.get('/', (req, res) => {
-  res.send('Furniture Tirth API is running');
-});
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-}); 
+});
