@@ -27,12 +27,12 @@ async function connectDB() {
     mongoose.set('bufferCommands', false);
     mongoose.set('bufferTimeoutMS', 0);
 
-    if (!process.env.MONGO_URI) {
-      throw new Error('MONGO_URI environment variable is not defined');
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI environment variable is not defined');
     }
 
     // Connect to MongoDB
-    dbConnection = await mongoose.connect(process.env.MONGO_URI, {
+    dbConnection = await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
