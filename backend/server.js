@@ -6,6 +6,11 @@ const dotenv = require('dotenv');
 // Load environment variables
 dotenv.config();
 
+console.log('Cloudinary config check:');
+console.log('- Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME);
+console.log('- API Key exists:', !!process.env.CLOUDINARY_API_KEY);
+console.log('- API Secret exists:', !!process.env.CLOUDINARY_API_SECRET);
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
