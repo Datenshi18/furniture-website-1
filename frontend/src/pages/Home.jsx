@@ -98,7 +98,7 @@ export default function Home() {
                 zIndex: 2
               }}>
                 <img 
-                  src="/path/to/your/premium-furniture-image.jpg" 
+                  src="/qq.jpeg" 
                   alt="Premium Furniture Collection" 
                   style={{
                     width: '100%',
